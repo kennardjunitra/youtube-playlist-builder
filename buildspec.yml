@@ -1,34 +1,38 @@
 version: 0.2
 
-env:
-  variables:
-    IMAGE_REPO_NAME: "youtube-playlist-batch-creator/youtube-playlist-builder"
-    IMAGE_TAG: "v${CODEBUILD_RESOLVED_SOURCE_VERSION}"   # or use ${CODEBUILD_BUILD_NUMBER}
-    AWS_DEFAULT_REGION: "ap-southeast-1"
-    ACCOUNT_ID: "117433956934"
-  # optional: enable BuildKit for faster builds
-  # exported-variables: [IMAGE_URI]
-
 phases:
   pre_build:
     commands:
-      - echo Logging in to Amazon ECR...
-      - echo RepositoryURI=$REPOSITORY_URI
-      - REGISTRY=$(echo $REPOSITORY_URI | cut -d'/' -f1)
-      - REPO_NAME=$(echo $REPOSITORY_URI | cut -d'/' -f2-)
-      - echo Registry=$REGISTRY Repo=$REPO_NAME
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $REGISTRY
-      - aws ecr describe-repositories --repository-names $REPO_NAME >/dev/null 2>&1 || aws ecr create-repository --repository-name $REPO_NAME
+      - set -euo pipefail
+      - echo "== Env =="
+      - echo "AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-NOT_SET}"
+      - echo "REPOSITORY_URI=${REPOSITORY_URI:-NOT_SET}"
+      - '[ -n "${AWS_DEFAULT_REGION:-}" ] || { echo "ERROR: AWS_DEFAULT_REGION not set"; exit 1; }'
+      - '[ -n "${REPOSITORY_URI:-}" ] || { echo "ERROR: REPOSITORY_URI not set"; exit 1; }'
+      - echo "== Parse registry/repo =="
+      - REGISTRY=$(echo "$REPOSITORY_URI" | cut -d'/' -f1)
+      - REPO_NAME=$(echo "$REPOSITORY_URI" | cut -d'/' -f2-)
+      - echo "Registry=$REGISTRY"
+      - echo "Repo=$REPO_NAME"
+      - echo "== Login to ECR =="
+      - aws ecr get-login-password --region "$AWS_DEFAULT_REGION" | docker login --username AWS --password-stdin "$REGISTRY"
+      - echo "== Ensure ECR repo exists =="
+      - aws ecr describe-repositories --repository-names "$REPO_NAME" >/dev/null 2>&1 || \
+        aws ecr create-repository --repository-name "$REPO_NAME" \
+          --image-tag-mutability IMMUTABLE --image-scanning-configuration scanOnPush=true
+      - echo "== Defaults for Dockerfile/context =="
+      - DF="${DF:-Dockerfile}"
+      - BUILDCTX="${BUILDCTX:-.}"
   build:
     commands:
-      - echo Build started on `date`
-      - docker build -f $DF -t $REPOSITORY_URI:$IMAGE_TAG $BUILDCTX
-      - docker tag ${IMAGE_REPO_NAME}:${IMAGE_TAG} ${REPOSITORY_URI}:${IMAGE_TAG}
+      - echo "== Build =="
+      - echo "docker build -f ${DF} -t ${REPOSITORY_URI}:${IMAGE_TAG} ${BUILDCTX}"
+      - docker build -f "${DF}" -t "${REPOSITORY_URI}:${IMAGE_TAG}" "${BUILDCTX}"
   post_build:
     commands:
-      - echo Pushing image...
-      - docker push $REPOSITORY_URI:$IMAGE_TAG
-      - printf '[{"name":"%s","imageUri":"%s"}]\n' "$IMAGEG_REPO_NAME" "$REPOSITORY_URI:$IMAGE_TAG" > imageDetail.json
+      - echo "== Push =="
+      - docker push "${REPOSITORY_URI}:${IMAGE_TAG}"
+      - printf '{"ImageURI":"%s"}\n' "${REPOSITORY_URI}:${IMAGE_TAG}" > imageDetail.json
 
 artifacts:
   files:
