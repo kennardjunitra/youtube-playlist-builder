@@ -1,0 +1,54 @@
+
+{
+  "premier_league": {
+    "channel_ids": ["UCv4E-sQMCMy1w2TzHJBsTJQ"],
+    "search_filter": "highlights",
+    "min_duration_minutes": 3
+  },
+  "serie_a": {
+    "channel_ids": ["UCBJeMCIeLQos7wacox4hmLQ"],
+    "search_filter": "Highlights",
+    "min_duration_minutes": 2
+  },
+  "la_liga": {
+    "channel_ids": ["UCYtNSrfGdXooZYu_hkq18_w"],
+    "search_filter": "LaLiga",
+    "min_duration_minutes": 5
+  },
+  "champions_league": {
+    "channel_ids": ["UCYtNSrfGdXooZYu_hkq18_w"],
+    "search_filter": "\"Champions League 25/26 Match Highlights\"",
+    "min_duration_minutes": 5
+  },
+  "nba": {
+    "channel_ids": ["UCWJ2lWNubArHWmf3FIHbfcQ"],
+    "search_filter": "highlights",
+    "min_duration_minutes": 9
+  },
+  "europa_league": {
+    "channel_ids": ["UCYtNSrfGdXooZYu_hkq18_w"],
+    "search_filter": "\"Europa League 25/26 Match Highlights\"",
+    "min_duration_minutes": 3
+  },
+  "tennis": {
+    "channel_ids": ["UCYtNSrfGdXooZYu_hkq18_w"],
+    "search_filter": "Tennis",
+    "min_duration_minutes": 3
+  },
+  "formula1": {
+    "channel_ids": ["UCYtNSrfGdXooZYu_hkq18_w"],
+    "search_filter": "Highlights",
+    "min_duration_minutes": 8
+  },
+  "bundesliga": {
+    "channel_ids": ["UCYtNSrfGdXooZYu_hkq18_w"],
+    "search_filter": "Bundesliga 25/26 Match Highlights",
+    "min_duration_minutes": 5
+  },
+  "all": {
+    "channel_ids": ["UCv4E-sQMCMy1w2TzHJBsTJQ", "UCYtNSrfGdXooZYu_hkq18_w", "UCWJ2lWNubArHWmf3FIHbfcQ", "UCBJeMCIeLQos7wacox4hmLQ", "UCWJ2lWNubArHWmf3FIHbfcQ"],
+    "search_filter": "Highlights",
+	"search_keywords": ["Serie A", "Bayern", "Dortmund", "Leverkusen", "Madrid", "Barcelona", "Full Game"],
+    "min_duration_minutes": 3
+  }
+}
