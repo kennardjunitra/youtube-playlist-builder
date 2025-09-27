@@ -2,9 +2,10 @@ version: 0.2
 
 env:
   variables:
-    IMAGE_REPO_NAME: "lambda-playlist-builder"
+    IMAGE_REPO_NAME: "youtube-playlist-batch-creator/youtube-playlist-builder"
     IMAGE_TAG: "v${CODEBUILD_RESOLVED_SOURCE_VERSION}"   # or use ${CODEBUILD_BUILD_NUMBER}
     AWS_DEFAULT_REGION: "ap-southeast-1"
+    ACCOUNT_ID: "117433956934"
   # optional: enable BuildKit for faster builds
   # exported-variables: [IMAGE_URI]
 
@@ -12,23 +13,23 @@ phases:
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
-      - ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-      - ECR_URI=${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
-      - aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${ECR_URI}
-      - echo "Resolved ECR: ${ECR_URI}/${IMAGE_REPO_NAME}"
+      - echo RepositoryURI=$REPOSITORY_URI
+      - REGISTRY=$(echo $REPOSITORY_URI | cut -d'/' -f1)
+      - REPO_NAME=$(echo $REPOSITORY_URI | cut -d'/' -f2-)
+      - echo Registry=$REGISTRY Repo=$REPO_NAME
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $REGISTRY
+      - aws ecr describe-repositories --repository-names $REPO_NAME >/dev/null 2>&1 || aws ecr create-repository --repository-name $REPO_NAME
   build:
     commands:
       - echo Build started on `date`
-      - docker build -t ${IMAGE_REPO_NAME}:${IMAGE_TAG} .
-      - docker tag ${IMAGE_REPO_NAME}:${IMAGE_TAG} ${ECR_URI}/${IMAGE_REPO_NAME}:${IMAGE_TAG}
+      - docker build -f $DF -t $REPOSITORY_URI:$IMAGE_TAG $BUILDCTX
+      - docker tag ${IMAGE_REPO_NAME}:${IMAGE_TAG} ${REPOSITORY_URI}:${IMAGE_TAG}
   post_build:
     commands:
       - echo Pushing image...
-      - docker push ${ECR_URI}/${IMAGE_REPO_NAME}:${IMAGE_TAG}
-      - IMAGE_URI=${ECR_URI}/${IMAGE_REPO_NAME}:${IMAGE_TAG}
-      - echo "Image pushed: ${IMAGE_URI}"
-      # (optional) write an artifact file Lambda/CI can read
-      - printf '{"ImageURI":"%s"}' "${IMAGE_URI}" > imageDetail.json
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - printf '[{"name":"%s","imageUri":"%s"}]\n' "$IMAGEG_REPO_NAME" "$REPOSITORY_URI:$IMAGE_TAG" > imageDetail.json
+
 artifacts:
   files:
     - imageDetail.json
