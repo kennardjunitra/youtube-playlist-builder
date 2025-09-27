@@ -3,7 +3,7 @@ version: 0.2
 env:
   variables:
     IMAGE_REPO_NAME: "youtube-playlist-batch-creator/youtube-playlist-builder"
-    IMAGE_TAG: "v${CODEBUILD_BUILD_NUMBER}"   # or use ${CODEBUILD_RESOLVED_SOURCE_VERSION}
+    IMAGE_TAG: "v${CODEBUILD_RESOLVED_SOURCE_VERSION}"   # or use ${CODEBUILD_BUILD_NUMBER}
     AWS_DEFAULT_REGION: "ap-southeast-1"
     ACCOUNT_ID: "117433956934"
   # optional: enable BuildKit for faster builds
