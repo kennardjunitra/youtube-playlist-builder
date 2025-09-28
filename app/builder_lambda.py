@@ -17,9 +17,9 @@ cloudwatch = boto3.client("cloudwatch")
 
 # ==== ENV ====
 YOUTUBE_SECRET_NAME = os.environ["SECRET_NAME_COMBINED"]
-CONFIG_S3_BUCKET    = os.environ["CONFIG_S3_BUCKET"]
-CONFIG_S3_KEY       = os.environ["CONFIG_S3_KEY"]            # e.g., channels.json
-REPORTS_BUCKET      = os.getenv("REPORTS_BUCKET")            # optional
+#CONFIG_S3_BUCKET    = os.environ["CONFIG_S3_BUCKET"]
+#CONFIG_S3_KEY       = os.environ["CONFIG_S3_KEY"]            # e.g., channels.json
+#REPORTS_BUCKET      = os.getenv("REPORTS_BUCKET")            # optional
 APP_TZ              = os.getenv("APP_TZ", "Asia/Singapore")
 
 # ==== HANDLER ====
@@ -50,17 +50,17 @@ def handler(event, context):
         try:
             probe = yt.channels().list(part="snippet", mine=True).execute()
             channel_title = (probe.get("items") or [{}])[0].get("snippet", {}).get("title", "Unknown Channel")
-            _write_report_line(REPORTS_BUCKET, {
-                "taskId": task.get("taskId", "manual"),
-                "ok": True, "mode": "test", "channel": channel_title
-            })
+            #_write_report_line(REPORTS_BUCKET, {
+            #    "taskId": task.get("taskId", "manual"),
+            #    "ok": True, "mode": "test", "channel": channel_title
+            #})
             return {"ok": True, "message": "YouTube API reachable", "channel": channel_title}
         except Exception as e:
             log.exception("YouTube API probe failed")
-            _write_report_line(REPORTS_BUCKET, {
-                "taskId": task.get("taskId", "manual"),
-                "ok": False, "mode": "test", "error": str(e)
-            })
+            #_write_report_line(REPORTS_BUCKET, {
+            #    "taskId": task.get("taskId", "manual"),
+            #    "ok": False, "mode": "test", "error": str(e)
+            #})
             raise    
 
     # 1) Load channels.json
