@@ -132,19 +132,42 @@ def _create_or_get_playlist(yt, title, description="", privacy="unlisted", tags=
 def _compute_cutoff_iso(earliest_date):
     """Compute cutoff ISO datetime string"""
     try:
-        # Parse input date
+        # Normalize to a date object regardless of input type
+        if earliest_date is None:
+            raise ValueError("earliest_date is required")
+
+        input_date = None
+
+        # String input: try datetime first, then date-only
         if isinstance(earliest_date, str):
-            if earliest_date.endswith('Z'):
-                input_dt = datetime.fromisoformat(earliest_date.replace('Z', ''))
-            else:
-                input_dt = datetime.fromisoformat(earliest_date + 'T00:00:00')
+            s = earliest_date.strip()
+            try:
+                # Handle 'Z' (UTC) by converting to +00:00 for fromisoformat
+                if s.endswith('Z'):
+                    dt = datetime.fromisoformat(s.replace('Z', '+00:00'))
+                else:
+                    # Allows both date-only and full ISO datetime strings
+                    dt = datetime.fromisoformat(s) if 'T' in s else datetime.fromisoformat(s + 'T00:00:00')
+                input_date = dt.date()
+            except Exception:
+                # Fallback: parse as date-only using isodate
+                input_date = isodate.parse_date(s)
+
+        # Datetime input
+        elif isinstance(earliest_date, datetime):
+            input_date = earliest_date.date()
+
+        # date-like input (datetime.date)
+        elif hasattr(earliest_date, "year") and hasattr(earliest_date, "month") and hasattr(earliest_date, "day"):
+            input_date = earliest_date
+
         else:
-            input_dt = earliest_date
-            
+            raise TypeError(f"Unsupported type for earliest_date: {type(earliest_date)}")
+
         # Calculate days difference from today
         now_sg = datetime.now(ZoneInfo(APP_TZ))
         today_sg = now_sg.date()
-        days_diff = (today_sg - input_dt.date()).days
+        days_diff = (today_sg - input_date).days
         
         # Calculate cutoff datetime in UTC
         cutoff_datetime_utc = datetime.now(timezone.utc) - timedelta(days=days_diff) - timedelta(hours=24)
