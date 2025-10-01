@@ -37,12 +37,30 @@ def handler(event, context):
     test_mode      = bool(task.get("test_mode", False))
     region_code    = (task.get("region") or os.getenv("YOUTUBE_REGION_CODE") or "SG").upper()
     max_pages      = int(os.getenv("YOUTUBE_MAX_PAGES", "4"))
-    cutoff_iso     = _compute_cutoff_iso(earliest_date)
+
+    # Log invocation context and parsed inputs
+    source = "SQS" if "Records" in event else "Direct"
+    try:
+        event_keys = list(event.keys()) if isinstance(event, dict) else type(event).__name__
+    except Exception:
+        event_keys = "<unavailable>"
+    log.info("Invocation source=%s, event_keys=%s", source, event_keys)
+    if source == "SQS":
+        try:
+            log.info("SQS records count=%d", len(event.get("Records", [])))
+        except Exception:
+            pass
+    log.info(
+        "Parsed task: competition_id=%r, earliest_date=%r, test_mode=%r, region=%r, max_pages=%r",
+        competition_id, earliest_date, test_mode, region_code, max_pages,
+    )
 
     if not competition_id:
         raise ValueError("Missing 'competition_id' in event")
     if not earliest_date:
         raise ValueError("Missing 'earliest_date' in event")
+
+    cutoff_iso     = _compute_cutoff_iso(earliest_date)
 
     yt = youtube_client_from_secret()  # pulls creds from Secrets Manager
 
@@ -132,6 +150,7 @@ def _create_or_get_playlist(yt, title, description="", privacy="unlisted", tags=
 def _compute_cutoff_iso(earliest_date):
     """Compute cutoff ISO datetime string"""
     try:
+        log.debug("_compute_cutoff_iso input earliest_date=%r type=%s", earliest_date, type(earliest_date).__name__)
         # Normalize to a date object regardless of input type
         if earliest_date is None:
             raise ValueError("earliest_date is required")
