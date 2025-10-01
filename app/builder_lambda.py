@@ -1,5 +1,5 @@
 # app/builder_lambda.py
-import os, json, logging, boto3
+import os, json, logging, boto3, re
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 from google.oauth2.credentials import Credentials
@@ -31,10 +31,23 @@ def handler(event, context):
     """
     # support SQS or direct invoke
     task = json.loads(event["Records"][0]["body"]) if "Records" in event else event
+    # normalize top-level task keys by trimming stray ASCII/Unicode spaces from keys (common in manual tests)
+    if isinstance(task, dict):
+        def _trim_key(k: str):
+            if not isinstance(k, str):
+                return k
+            # remove leading/trailing whitespace including NBSP/figure/thin spaces and zero-width separators
+            return re.sub(r'^[\s\u00A0\u2007\u202F\u200B\u200C\u200D]+|[\s\u00A0\u2007\u202F\u200B\u200C\u200D]+$', '', k)
+        task = { _trim_key(k): v for k, v in task.items() }
 
     competition_id = task.get("competition_id")
     earliest_date  = task.get("earliest_date")  # ISO date or datetime
-    test_mode      = bool(task.get("test_mode", False))
+    # coerce test_mode from various forms (bool, string, numbers)
+    _tm = task.get("test_mode", False)
+    if isinstance(_tm, str):
+        test_mode = _tm.strip().lower() in ("true", "1", "yes", "y")
+    else:
+        test_mode = bool(_tm)
     region_code    = (task.get("region") or os.getenv("YOUTUBE_REGION_CODE") or "SG").upper()
     max_pages      = int(os.getenv("YOUTUBE_MAX_PAGES", "4"))
 
@@ -48,6 +61,16 @@ def handler(event, context):
     if source == "SQS":
         try:
             log.info("SQS records count=%d", len(event.get("Records", [])))
+        except Exception:
+            pass
+    if isinstance(task, dict):
+        try:
+            log.info("Normalized task keys=%s", list(task.keys()))
+        except Exception:
+            pass
+    if isinstance(task, dict):
+        try:
+            log.info("Task key reprs=%s", [repr(k) for k in task.keys()])
         except Exception:
             pass
     log.info(
