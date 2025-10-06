@@ -7,6 +7,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from google.auth.transport.requests import Request
 import isodate
+from pathlib import Path
 
 log = logging.getLogger()
 log.setLevel(os.getenv("LOG_LEVEL", "INFO"))
@@ -17,6 +18,7 @@ cloudwatch = boto3.client("cloudwatch")
 
 # ==== ENV ====
 YOUTUBE_SECRET_NAME = os.environ["SECRET_NAME_COMBINED"]
+# S3-related environment variables (no longer needed - using local channels.json)
 #CONFIG_S3_BUCKET    = os.environ["CONFIG_S3_BUCKET"]
 #CONFIG_S3_KEY       = os.environ["CONFIG_S3_KEY"]            # e.g., channels.json
 #REPORTS_BUCKET      = os.getenv("REPORTS_BUCKET")            # optional
@@ -136,12 +138,16 @@ def youtube_client_from_secret(secret_name=YOUTUBE_SECRET_NAME):
     return build("youtube", "v3", credentials=creds, cache_discovery=False)
 
 def _load_channels_config():
-    """Load channels configuration from S3"""
+    """Load channels configuration from local channels.json file"""
     try:
-        response = s3.get_object(Bucket=CONFIG_S3_BUCKET, Key=CONFIG_S3_KEY)
-        return json.loads(response['Body'].read().decode('utf-8'))
+        # Get the path to the channels.json file relative to this script
+        script_dir = Path(__file__).parent
+        channels_file = script_dir / "channels.json"
+        
+        with open(channels_file, 'r', encoding='utf-8') as f:
+            return json.load(f)
     except Exception as e:
-        log.error(f"Failed to load channels config from S3: {e}")
+        log.error(f"Failed to load channels config from local file: {e}")
         raise
 
 def _create_or_get_playlist(yt, title, description="", privacy="unlisted", tags=None):
