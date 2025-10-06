@@ -112,17 +112,47 @@ def handler(event, context):
     if not cfg:
         raise ValueError(f"Unknown competition_id '{competition_id}'")
 
-    pl = task["playlist"]  # expects {title, description?, privacy?, tags?}
-    playlist_id = _create_or_get_playlist(
-        yt,
-        title=pl["title"],
-        description=pl.get("description", "Auto-generated playlist"),
-        privacy=pl.get("privacy", "unlisted"),
-        tags=pl.get("tags", []),
-    )
+    # Debug: Log task structure to understand what keys are available
+    log.info("Task keys: %s", list(task.keys()) if isinstance(task, dict) else "Not a dict")
+    
+    # Handle playlist creation - either from task or generate default
+    if "playlist" in task:
+        pl = task["playlist"]  # expects {title, description?, privacy?, tags?}
+        playlist_id = _create_or_get_playlist(
+            yt,
+            title=pl["title"],
+            description=pl.get("description", "Auto-generated playlist"),
+            privacy=pl.get("privacy", "unlisted"),
+            tags=pl.get("tags", []),
+        )
+    else:
+        # Generate default playlist based on competition
+        competition_name = competition_id.replace("_", " ").title()
+        default_title = f"{competition_name} Highlights"
+        playlist_id = _create_or_get_playlist(
+            yt,
+            title=default_title,
+            description=f"Auto-generated {competition_name} highlights playlist",
+            privacy="unlisted",
+            tags=[competition_name.lower(), "highlights"],
+        )
 
-    log.info("Ensured playlist '%s' -> %s", pl["title"], playlist_id)
-    return {"ok": True, "playlist_id": playlist_id}  # return ignored for SQS
+    # Log the playlist creation
+    playlist_title = pl["title"] if "playlist" in task else default_title
+    log.info("Ensured playlist '%s' -> %s", playlist_title, playlist_id)
+    
+    # 2) Search for videos based on channel configuration
+    video_ids = _search_videos(yt, cfg, cutoff_iso, region_code, max_pages)
+    
+    if not video_ids:
+        log.warning("No matching videos found for competition '%s'", competition_id)
+        return {"ok": True, "playlist_id": playlist_id, "videos_added": 0, "message": "No matching videos found"}
+    
+    # 3) Add videos to playlist
+    videos_added = _add_videos_to_playlist(yt, playlist_id, video_ids)
+    
+    log.info("Added %d videos to playlist '%s'", videos_added, playlist_title)
+    return {"ok": True, "playlist_id": playlist_id, "videos_added": videos_added}
 
 # ==== HELPERS ====
 def youtube_client_from_secret(secret_name=YOUTUBE_SECRET_NAME):
@@ -153,7 +183,21 @@ def _load_channels_config():
 def _create_or_get_playlist(yt, title, description="", privacy="unlisted", tags=None):
     """Create a new playlist or return existing one"""
     try:
-        # Create new playlist
+        # First, check if a playlist with this title already exists
+        existing_playlists = yt.playlists().list(
+            part="snippet",
+            mine=True,
+            maxResults=50
+        ).execute()
+        
+        # Look for existing playlist with the same title
+        for playlist in existing_playlists.get("items", []):
+            if playlist["snippet"]["title"] == title:
+                log.info("Found existing playlist '%s' with ID: %s", title, playlist["id"])
+                return playlist["id"]
+        
+        # If no existing playlist found, create a new one
+        log.info("Creating new playlist '%s'", title)
         playlist_body = {
             "snippet": {
                 "title": title,
@@ -170,11 +214,114 @@ def _create_or_get_playlist(yt, title, description="", privacy="unlisted", tags=
             body=playlist_body
         ).execute()
         
+        log.info("Created new playlist '%s' with ID: %s", title, playlist["id"])
         return playlist["id"]
         
     except HttpError as e:
-        log.error(f"Failed to create playlist: {e}")
+        log.error(f"Failed to create or get playlist: {e}")
         raise
+
+def _search_videos(yt, cfg, cutoff_iso, region_code, max_pages):
+    """Search for videos based on channel configuration"""
+    channel_ids = cfg.get("channel_ids", [])
+    search_filter = cfg.get("search_filter", "")
+    min_duration_minutes = cfg.get("min_duration_minutes", 3)
+    search_keywords = cfg.get("search_keywords", [])
+    
+    min_duration_seconds = min_duration_minutes * 60
+    video_ids = []
+    seen = set()
+    
+    # Build search queries
+    queries = [search_filter] if search_filter else []
+    if search_keywords:
+        queries.extend(search_keywords)
+    
+    if not queries:
+        log.warning("No search queries available for video search")
+        return video_ids
+    
+    log.info("Searching for videos with queries: %s", queries)
+    log.info("Channel IDs: %s, Min duration: %d minutes", channel_ids, min_duration_minutes)
+    
+    for channel_id in channel_ids:
+        for q in queries:
+            log.info("🔎 Searching channel=%s query=%r", channel_id, q)
+            page_token = None
+            pages = 0
+
+            while True:
+                try:
+                    resp = yt.search().list(
+                        part="id,snippet",
+                        channelId=channel_id,
+                        q=q,
+                        type="video",
+                        order="date",
+                        maxResults=50,
+                        publishedAfter=cutoff_iso,
+                        regionCode=region_code,
+                        relevanceLanguage="en",
+                        pageToken=page_token,
+                    ).execute()
+                except HttpError as e:
+                    log.error("YouTube search failed for channel %s, query %s: %s", channel_id, q, e)
+                    break
+
+                items = resp.get("items", [])
+                cand_ids = [it["id"].get("videoId") for it in items if it.get("id") and it["id"].get("videoId")]
+
+                if cand_ids:
+                    try:
+                        details = yt.videos().list(
+                            part="contentDetails",
+                            id=",".join(cand_ids),
+                        ).execute()
+                    except HttpError as e:
+                        log.error("videos.list failed for details: %s", e)
+                        details = {"items": []}
+
+                    for v in details.get("items", []):
+                        vid = v["id"]
+                        dur_s = isodate.parse_duration(v["contentDetails"]["duration"]).total_seconds()
+                        if dur_s > min_duration_seconds and vid not in seen:
+                            seen.add(vid)
+                            video_ids.append(vid)
+                            log.debug("Added video %s (duration: %.1f seconds)", vid, dur_s)
+
+                page_token = resp.get("nextPageToken")
+                pages += 1
+                if not page_token or pages >= max_pages:
+                    break
+
+    log.info("Found %d unique videos matching criteria", len(video_ids))
+    return video_ids
+
+def _add_videos_to_playlist(yt, playlist_id, video_ids):
+    """Add videos to the specified playlist"""
+    videos_added = 0
+    
+    for video_id in video_ids:
+        try:
+            yt.playlistItems().insert(
+                part="snippet",
+                body={
+                    "snippet": {
+                        "playlistId": playlist_id,
+                        "resourceId": {
+                            "kind": "youtube#video",
+                            "videoId": video_id
+                        }
+                    }
+                }
+            ).execute()
+            videos_added += 1
+            log.debug("Added video %s to playlist %s", video_id, playlist_id)
+        except HttpError as e:
+            log.error("Failed to add video %s to playlist %s: %s", video_id, playlist_id, e)
+    
+    log.info("Successfully added %d videos to playlist %s", videos_added, playlist_id)
+    return videos_added
 
 def _compute_cutoff_iso(earliest_date):
     """Compute cutoff ISO datetime string"""
