@@ -130,7 +130,7 @@ def youtube_client_from_secret(secret_name=YOUTUBE_SECRET_NAME):
         refresh_token=data["REFRESH_TOKEN"],
         token_uri=data.get("token_uri", "https://oauth2.googleapis.com/token"),
         client_id=data["CLIENT_ID"],
-        client_secret=data["CLIENT_SECRET"],
+        client_secret=data["CLIENT_SECRET_KEY"],
         scopes=["https://www.googleapis.com/auth/youtube"]
     )
     return build("youtube", "v3", credentials=creds, cache_discovery=False)
