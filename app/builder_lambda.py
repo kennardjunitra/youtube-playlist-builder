@@ -115,30 +115,17 @@ def handler(event, context):
     # Debug: Log task structure to understand what keys are available
     log.info("Task keys: %s", list(task.keys()) if isinstance(task, dict) else "Not a dict")
     
-    # Handle playlist creation - either from task or generate default
-    if "playlist" in task:
-        pl = task["playlist"]  # expects {title, description?, privacy?, tags?}
-        playlist_id = _create_or_get_playlist(
-            yt,
-            title=pl["title"],
-            description=pl.get("description", "Auto-generated playlist"),
-            privacy=pl.get("privacy", "unlisted"),
-            tags=pl.get("tags", []),
-        )
-    else:
-        # Generate default playlist based on competition
-        competition_name = competition_id.replace("_", " ").title()
-        default_title = f"{competition_name} Highlights"
-        playlist_id = _create_or_get_playlist(
-            yt,
-            title=default_title,
-            description=f"Auto-generated {competition_name} highlights playlist",
-            privacy="unlisted",
-            tags=[competition_name.lower(), "highlights"],
-        )
+    # Generate playlist based on competition
+    competition_name = competition_id.replace("_", " ").title()
+    playlist_title = f"{competition_name} Highlights"
+    playlist_id = _create_playlist(
+        yt,
+        title=playlist_title,
+        description=f"Auto-generated {competition_name} highlights playlist",
+        privacy="unlisted",
+        tags=[competition_name.lower(), "highlights"],
+    )
 
-    # Log the playlist creation
-    playlist_title = pl["title"] if "playlist" in task else default_title
     log.info("Ensured playlist '%s' -> %s", playlist_title, playlist_id)
     
     # 2) Search for videos based on channel configuration
@@ -180,23 +167,9 @@ def _load_channels_config():
         log.error(f"Failed to load channels config from local file: {e}")
         raise
 
-def _create_or_get_playlist(yt, title, description="", privacy="unlisted", tags=None):
-    """Create a new playlist or return existing one"""
+def _create_playlist(yt, title, description="", privacy="unlisted", tags=None):
+    """Create a new playlist"""
     try:
-        # First, check if a playlist with this title already exists
-        existing_playlists = yt.playlists().list(
-            part="snippet",
-            mine=True,
-            maxResults=50
-        ).execute()
-        
-        # Look for existing playlist with the same title
-        for playlist in existing_playlists.get("items", []):
-            if playlist["snippet"]["title"] == title:
-                log.info("Found existing playlist '%s' with ID: %s", title, playlist["id"])
-                return playlist["id"]
-        
-        # If no existing playlist found, create a new one
         log.info("Creating new playlist '%s'", title)
         playlist_body = {
             "snippet": {
@@ -218,7 +191,7 @@ def _create_or_get_playlist(yt, title, description="", privacy="unlisted", tags=
         return playlist["id"]
         
     except HttpError as e:
-        log.error(f"Failed to create or get playlist: {e}")
+        log.error(f"Failed to create playlist: {e}")
         raise
 
 def _search_videos(yt, cfg, cutoff_iso, region_code, max_pages):
