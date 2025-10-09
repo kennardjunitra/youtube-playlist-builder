@@ -45,6 +45,11 @@
     "search_filter": "Bundesliga 25/26 Match Highlights",
     "min_duration_minutes": 5
   },
+  "AFC": {
+    "channel_ids": ["UCXTRFt1vLvZpahQtiKJjLaQ"],
+    "search_filter": "Highlights",
+    "min_duration_minutes": 2
+  },
   "all": {
     "channel_ids": ["UCv4E-sQMCMy1w2TzHJBsTJQ", "UCYtNSrfGdXooZYu_hkq18_w", "UCWJ2lWNubArHWmf3FIHbfcQ", "UCBJeMCIeLQos7wacox4hmLQ", "UCWJ2lWNubArHWmf3FIHbfcQ"],
     "search_filter": "Highlights",
