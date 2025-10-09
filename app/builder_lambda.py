@@ -122,7 +122,7 @@ def handler(event, context):
         yt,
         title=playlist_title,
         description=f"Auto-generated {competition_name} highlights playlist",
-        privacy="unlisted",
+        privacy="public",
         tags=[competition_name.lower(), "highlights"],
     )
 
