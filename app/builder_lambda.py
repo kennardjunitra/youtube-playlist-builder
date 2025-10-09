@@ -130,7 +130,7 @@ def handler(event, context):
     
     # 2) Search for videos based on channel configuration
     video_ids = _search_videos(yt, cfg, cutoff_iso, region_code, max_pages)
-    
+     
     if not video_ids:
         log.warning("No matching videos found for competition '%s'", competition_id)
         return {"ok": True, "playlist_id": playlist_id, "videos_added": 0, "message": "No matching videos found"}
@@ -202,7 +202,7 @@ def _search_videos(yt, cfg, cutoff_iso, region_code, max_pages):
     search_keywords = cfg.get("search_keywords", [])
     
     min_duration_seconds = min_duration_minutes * 60
-    video_ids = []
+    video_ids = ["Gb1iGDchKYs", "Gb1iGDchKYs"] #DEFAULT VIDEO FOR SPOILER BLOCKER
     seen = set()
     
     # Build search queries
@@ -247,7 +247,7 @@ def _search_videos(yt, cfg, cutoff_iso, region_code, max_pages):
                 if cand_ids:
                     try:
                         details = yt.videos().list(
-                            part="contentDetails",
+                            part="contentDetails,snippet",
                             id=",".join(cand_ids),
                         ).execute()
                     except HttpError as e:
@@ -257,10 +257,18 @@ def _search_videos(yt, cfg, cutoff_iso, region_code, max_pages):
                     for v in details.get("items", []):
                         vid = v["id"]
                         dur_s = isodate.parse_duration(v["contentDetails"]["duration"]).total_seconds()
-                        if dur_s > min_duration_seconds and vid not in seen:
+                        title = v.get("snippet", {}).get("title", "").lower()
+                        
+                        # Check if video title contains search_filter queries
+                        title_matches_filter = True
+                        if search_filter:
+                            filter_terms = [term.strip().lower() for term in search_filter.split() if term.strip()]
+                            title_matches_filter = any(term in title for term in filter_terms)
+                        
+                        if dur_s > min_duration_seconds and vid not in seen and title_matches_filter:
                             seen.add(vid)
                             video_ids.append(vid)
-                            log.debug("Added video %s (duration: %.1f seconds)", vid, dur_s)
+                            log.debug("Added video %s (duration: %.1f seconds, title: %s)", vid, dur_s, v.get("snippet", {}).get("title", "No title"))
 
                 page_token = resp.get("nextPageToken")
                 pages += 1
