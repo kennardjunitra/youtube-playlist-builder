@@ -117,12 +117,12 @@ def handler(event, context):
     
     # Generate playlist based on competition
     competition_name = competition_id.replace("_", " ").title()
-    playlist_title = f"{competition_name} Highlights"
+    playlist_title = f"{competition_name} Highlights - {earliest_date}"
     playlist_id = _create_playlist(
         yt,
         title=playlist_title,
         description=f"Auto-generated {competition_name} highlights playlist",
-        privacy="unlisted",
+        privacy="public",
         tags=[competition_name.lower(), "highlights"],
     )
 
