@@ -18,7 +18,7 @@
   "champions_league": {
     "channel_ids": ["UCYtNSrfGdXooZYu_hkq18_w"],
     "search_filter": "\"Champions League 25/26 Match Highlights\"",
-    "min_duration_minutes": 5
+    "min_duration_minutes": 3
   },
   "nba": {
     "channel_ids": ["UCWJ2lWNubArHWmf3FIHbfcQ"],
@@ -45,7 +45,7 @@
     "search_filter": "Bundesliga 25/26 Match Highlights",
     "min_duration_minutes": 5
   },
-  "AFC": {
+  "afc": {
     "channel_ids": ["UCXTRFt1vLvZpahQtiKJjLaQ"],
     "search_filter": "Highlights",
     "min_duration_minutes": 2
