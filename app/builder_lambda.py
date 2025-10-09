@@ -117,32 +117,12 @@ def handler(event, context):
     
     # Generate playlist based on competition
     competition_name = competition_id.replace("_", " ").title()
-    
-    # Calculate date for playlist title (earliest_date minus 1 day)
-    from datetime import datetime, timedelta
-    try:
-        # Parse earliest_date and subtract 1 day
-        if isinstance(earliest_date, str):
-            # Handle both date and datetime strings
-            if 'T' in earliest_date:
-                parsed_date = datetime.fromisoformat(earliest_date.replace('Z', '+00:00'))
-            else:
-                parsed_date = datetime.fromisoformat(earliest_date + 'T00:00:00')
-        else:
-            parsed_date = earliest_date
-        
-        # Subtract 1 day and format as date string
-        playlist_date = (parsed_date - timedelta(days=1)).strftime('%Y-%m-%d')
-    except:
-        # Fallback to original date if parsing fails
-        playlist_date = str(earliest_date)
-    
-    playlist_title = f"{competition_name} Highlights - {playlist_date}"
+    playlist_title = f"{competition_name} Highlights"
     playlist_id = _create_playlist(
         yt,
         title=playlist_title,
         description=f"Auto-generated {competition_name} highlights playlist",
-        privacy="public",
+        privacy="unlisted",
         tags=[competition_name.lower(), "highlights"],
     )
 
