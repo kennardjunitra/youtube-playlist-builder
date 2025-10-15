@@ -1,24 +1,27 @@
-
 {
   "premier_league": {
     "channel_ids": ["UCv4E-sQMCMy1w2TzHJBsTJQ"],
     "search_filter": "highlights",
-    "min_duration_minutes": 3
+    "min_duration_minutes": 3,
+    "default_video": "QbPQX3mf3hA"
   },
   "serie_a": {
     "channel_ids": ["UCBJeMCIeLQos7wacox4hmLQ"],
     "search_filter": "Highlights",
-    "min_duration_minutes": 2
+    "min_duration_minutes": 2,
+    "default_video": "hUAd1DTj9_Y"
   },
   "la_liga": {
     "channel_ids": ["UCYtNSrfGdXooZYu_hkq18_w"],
     "search_filter": "LaLiga",
-    "min_duration_minutes": 5
+    "min_duration_minutes": 5,
+    "default_video": "j9W3LnHzC5c"
   },
   "champions_league": {
     "channel_ids": ["UCYtNSrfGdXooZYu_hkq18_w"],
     "search_filter": "\"Champions League 25/26 Match Highlights\"",
-    "min_duration_minutes": 3
+    "min_duration_minutes": 5,
+    "default_video": "Gb1iGDchKYs"
   },
   "nba": {
     "channel_ids": ["UCWJ2lWNubArHWmf3FIHbfcQ"],
@@ -35,6 +38,11 @@
     "search_filter": "Tennis",
     "min_duration_minutes": 3
   },
+  "afc": {
+    "channel_ids": ["UCXTRFt1vLvZpahQtiKJjLaQ"],
+    "search_filter": "Highlights",
+    "min_duration_minutes": 2
+  }
   "formula1": {
     "channel_ids": ["UCYtNSrfGdXooZYu_hkq18_w"],
     "search_filter": "Highlights",
@@ -43,22 +51,27 @@
   "bundesliga": {
     "channel_ids": ["UCYtNSrfGdXooZYu_hkq18_w"],
     "search_filter": "Bundesliga 25/26 Match Highlights",
-    "min_duration_minutes": 5
-  },
-  "afc": {
-    "channel_ids": ["UCXTRFt1vLvZpahQtiKJjLaQ"],
-    "search_filter": "Highlights",
-    "min_duration_minutes": 2
-  },
-  "shanghai_masters": {
-    "channel_ids": ["UCXTRFt1vLvZpahQtiKJjLaQ"],
-    "search_filter": "Shanghai Masters",
-    "min_duration_minutes": 4
+    "min_duration_minutes": 5,
+    "default_video": "KYLiJ2NLuo8"
   },
   "all": {
-    "channel_ids": ["UCv4E-sQMCMy1w2TzHJBsTJQ", "UCYtNSrfGdXooZYu_hkq18_w", "UCWJ2lWNubArHWmf3FIHbfcQ", "UCBJeMCIeLQos7wacox4hmLQ", "UCWJ2lWNubArHWmf3FIHbfcQ"],
+    "channel_ids": [
+      "UCv4E-sQMCMy1w2TzHJBsTJQ",
+      "UCYtNSrfGdXooZYu_hkq18_w",
+      "UCWJ2lWNubArHWmf3FIHbfcQ",
+      "UCBJeMCIeLQos7wacox4hmLQ",
+      "UCWJ2lWNubArHWmf3FIHbfcQ"
+    ],
     "search_filter": "Highlights",
-	"search_keywords": ["Serie A", "Bayern", "Dortmund", "Leverkusen", "Madrid", "Barcelona", "Full Game"],
+    "search_keywords": [
+      "Serie A",
+      "Bayern",
+      "Dortmund",
+      "Leverkusen",
+      "Madrid",
+      "Barcelona",
+      "Full Game"
+    ],
     "min_duration_minutes": 3
   }
 }

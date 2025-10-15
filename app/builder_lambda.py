@@ -200,9 +200,16 @@ def _search_videos(yt, cfg, cutoff_iso, region_code, max_pages):
     search_filter = cfg.get("search_filter", "")
     min_duration_minutes = cfg.get("min_duration_minutes", 3)
     search_keywords = cfg.get("search_keywords", [])
-    
+
+    # Convert minutes to seconds
     min_duration_seconds = min_duration_minutes * 60
-    video_ids = ["Gb1iGDchKYs", "Gb1iGDchKYs"] #DEFAULT VIDEO FOR SPOILER BLOCKER
+
+    # Initialize with default video if provided, otherwise fallback to spoiler blocker
+    default_video = cfg.get("default_video")
+    if default_video:
+        video_ids = [default_video, default_video]
+    else:
+        video_ids = ["6PAfoH7uTMI", "6PAfoH7uTMI"]  # fallback for spoiler blocker
     seen = set()
     
     # Build search queries
