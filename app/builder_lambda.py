@@ -160,8 +160,8 @@ def handler(event, context):
                 }
             )
             log.info("Published SNS notification to topic '%s'", sns_topic_name)
-        except Exception:
-            log.exception("Failed to publish SNS notification for topic '%s'", sns_topic_name)
+        except Exception as e:
+            log.exception("Failed to publish SNS notification for topic '%s': %s", sns_topic_name, str(e))
 
     return {"ok": True, "playlist_id": playlist_id, "videos_added": videos_added}
 
@@ -434,5 +434,10 @@ def _publish_playlist_sns(topic_name: str, subject: str, message: dict):
         log.warning("SNS topic '%s' not found; skipping publish", topic_name)
         return
 
-    payload = json.dumps(message, ensure_ascii=False, separators=(",", ":"))
-    sns.publish(TopicArn=arn, Subject=subject[:100], Message=payload)
+    try:
+        payload = json.dumps(message, ensure_ascii=False, separators=(",", ":"))
+        response = sns.publish(TopicArn=arn, Subject=subject[:100], Message=payload)
+        log.info("SNS publish successful. MessageId: %s", response.get('MessageId'))
+    except Exception as e:
+        log.error("SNS publish failed for ARN '%s': %s", arn, str(e))
+        raise
