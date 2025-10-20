@@ -9,7 +9,8 @@
     "channel_ids": ["UCBJeMCIeLQos7wacox4hmLQ"],
     "search_filter": "Highlights",
     "min_duration_minutes": 2,
-    "default_video": "hUAd1DTj9_Y"
+    "default_video": "hUAd1DTj9_Y",
+    "sns_topic_name": "arn:aws:sns:ap-southeast-1:117433956934:SerieAYoutubePlaylistSubs"
   },
   "la_liga": {
     "channel_ids": ["UCYtNSrfGdXooZYu_hkq18_w"],
@@ -21,7 +22,8 @@
     "channel_ids": ["UCYtNSrfGdXooZYu_hkq18_w"],
     "search_filter": "\"Champions League 25/26 Match Highlights\"",
     "min_duration_minutes": 5,
-    "default_video": "Gb1iGDchKYs"
+    "default_video": "Gb1iGDchKYs",
+    "sns_topic_name": "arn:aws:sns:ap-southeast-1:117433956934:champions_league_playlist_subscription"
   },
   "nba": {
     "channel_ids": ["UCWJ2lWNubArHWmf3FIHbfcQ"],

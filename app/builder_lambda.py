@@ -15,6 +15,7 @@ log.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 s3 = boto3.client("s3")
 secrets = boto3.client("secretsmanager")
 cloudwatch = boto3.client("cloudwatch")
+sns = boto3.client("sns")
 
 # ==== ENV ====
 YOUTUBE_SECRET_NAME = os.environ["SECRET_NAME_COMBINED"]
@@ -139,7 +140,30 @@ def handler(event, context):
     videos_added = _add_videos_to_playlist(yt, playlist_id, video_ids)
     
     log.info("Added %d videos to playlist '%s'", videos_added, playlist_title)
-    return {"ok": True, "playlist_id": playlist_id, "videos_added": videos_added}
+
+	# 4) Optionally publish to SNS if configured for this competition
+	sns_topic_name = cfg.get("sns_topic_name")
+	if sns_topic_name:
+		try:
+			_publish_playlist_sns(
+				topic_name=sns_topic_name,
+				subject=f"Playlist created: {playlist_title}",
+				message={
+					"competition_id": competition_id,
+					"playlist_title": playlist_title,
+					"playlist_id": playlist_id,
+					"playlist_url": f"https://www.youtube.com/playlist?list={playlist_id}",
+					"videos_added": videos_added,
+					"earliest_date": earliest_date,
+					"region_code": region_code,
+					"timestamp": datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
+				}
+			)
+			log.info("Published SNS notification to topic '%s'", sns_topic_name)
+		except Exception:
+			log.exception("Failed to publish SNS notification for topic '%s'", sns_topic_name)
+
+	return {"ok": True, "playlist_id": playlist_id, "videos_added": videos_added}
 
 # ==== HELPERS ====
 def youtube_client_from_secret(secret_name=YOUTUBE_SECRET_NAME):
@@ -376,3 +400,39 @@ def _now_tz():
 
 def _now_epoch():
     return int(_now_tz().timestamp())
+
+
+def _resolve_sns_topic_arn_by_name(topic_name: str):
+	"""Resolve an SNS Topic ARN from a topic name by scanning topics.
+
+	If the provided value is already an ARN, it is returned as-is.
+	"""
+	try:
+		# Heuristic: if it looks like an ARN, return directly
+		if topic_name.startswith("arn:aws:sns:"):
+			return topic_name
+
+		paginator = sns.get_paginator("list_topics")
+		for page in paginator.paginate():
+			for t in page.get("Topics", []):
+				arn = t.get("TopicArn")
+				if arn and arn.rsplit(":", 1)[-1] == topic_name:
+					return arn
+		return None
+	except Exception:
+		log.exception("Error resolving SNS topic ARN for name '%s'", topic_name)
+		return None
+
+
+def _publish_playlist_sns(topic_name: str, subject: str, message: dict):
+	"""Publish a JSON message to SNS if the topic can be resolved.
+
+	No-op if resolution fails.
+	"""
+	arn = _resolve_sns_topic_arn_by_name(topic_name)
+	if not arn:
+		log.warning("SNS topic '%s' not found; skipping publish", topic_name)
+		return
+
+	payload = json.dumps(message, ensure_ascii=False, separators=(",", ":"))
+	sns.publish(TopicArn=arn, Subject=subject[:100], Message=payload)
