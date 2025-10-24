@@ -28,7 +28,7 @@
   "nba": {
     "channel_ids": ["UCWJ2lWNubArHWmf3FIHbfcQ"],
     "search_filter": "highlights",
-    "min_duration_minutes": 9
+    "min_duration_minutes": 6
   },
   "europa_league": {
     "channel_ids": ["UCYtNSrfGdXooZYu_hkq18_w"],
