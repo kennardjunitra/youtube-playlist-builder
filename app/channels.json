@@ -26,9 +26,10 @@
     "sns_topic_name": "arn:aws:sns:ap-southeast-1:117433956934:champions_league_playlist_subscription"
   },
   "nba": {
-    "channel_ids": ["UCWJ2lWNubArHWmf3FIHbfcQ"],
+    "channel_ids": ["UC0LrZO9wORIqn_aRJtKdgfA"],
     "search_filter": "highlights",
-    "min_duration_minutes": 6
+    "min_duration_minutes": 6,
+    "default_video": "aiYqdkKAd4U"
   },
   "europa_league": {
     "channel_ids": ["UCYtNSrfGdXooZYu_hkq18_w"],
