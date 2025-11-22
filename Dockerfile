@@ -4,7 +4,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 #Install datadog library
-RUN pip install datadog-lambda
+pip install datadog-lambda
 
 
 # 4. Add the Datadog Lambda Extension (from Datadog’s public ECR)
