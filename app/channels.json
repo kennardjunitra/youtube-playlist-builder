@@ -57,6 +57,19 @@
     "min_duration_minutes": 0,
     "default_video": "KYLiJ2NLuo8"
   },
+  "custom": {
+    "channel_ids": ["UCYtNSrfGdXooZYu_hkq18_w"],
+    "search_filter": "Highlights",
+    "search_keywords": [
+      "Formula",
+      "Bayern",
+      "Dortmund",
+      "Barcelona,
+      "Madrid"
+    ]
+    "min_duration_minutes": 5,
+    "default_video": "Gb1iGDchKYs"
+  },
   "all": {
     "channel_ids": [
       "UCv4E-sQMCMy1w2TzHJBsTJQ",
