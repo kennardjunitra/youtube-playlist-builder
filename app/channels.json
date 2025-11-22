@@ -52,9 +52,9 @@
     "min_duration_minutes": 8
   },
   "bundesliga": {
-    "channel_ids": ["UCYtNSrfGdXooZYu_hkq18_w"],
-    "search_filter": "Bundesliga 25/26 Match Highlights",
-    "min_duration_minutes": 5,
+    "channel_ids": ["UC6UL29enLNe4mqwTfAyeNuw"],
+    "search_filter": "Highlights",
+    "min_duration_minutes": 0,
     "default_video": "KYLiJ2NLuo8"
   },
   "all": {
