@@ -59,7 +59,6 @@
   },
   "custom": {
     "channel_ids": ["UCYtNSrfGdXooZYu_hkq18_w"],
-    "search_filter": "Highlights",
     "search_keywords": [
       "Formula",
       "Bayern",
@@ -68,7 +67,8 @@
       "Madrid"
     ],
     "min_duration_minutes": 5,
-    "default_video": "Gb1iGDchKYs"
+    "default_video": "Gb1iGDchKYs",
+    "sns_topic_name": "arn:aws:sns:ap-southeast-1:117433956934:custom_playlist_subscription"
   },
   "all": {
     "channel_ids": [
