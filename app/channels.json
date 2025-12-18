@@ -14,7 +14,7 @@
   },
   "la_liga": {
     "channel_ids": ["UCTv-XvfzLX3i4IGWAm4sbmA"],
-    "search_filter": "Highlights",
+    "search_filter": "HIGHLIGHTS",
     "min_duration_minutes": 2,
     "default_video": "j9W3LnHzC5c"
   },
