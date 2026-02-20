@@ -66,7 +66,7 @@
     "channel_ids": ["UCbcxFkd6B9xUU54InHv4Tig"],
     "search_filter": "Highlights",
     "min_duration_minutes": 3,
-    "sns_topic_name": "arn:aws:sns:ap-southeast-1:117433956934:Tennis-Highlights:d673da9e-2cd7-42b9-bfc9-1f014398a66a"
+    "sns_topic_name": "arn:aws:sns:ap-southeast-1:117433956934:Tennis-Highlights"
   },
   "custom": {
     "channel_ids": ["UCYtNSrfGdXooZYu_hkq18_w"],
