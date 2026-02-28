@@ -62,7 +62,7 @@
     "min_duration_minutes": 0,
     "default_video": "KYLiJ2NLuo8"
   },
-  "doha": {
+  "tennis_tv": {
     "channel_ids": ["UCbcxFkd6B9xUU54InHv4Tig"],
     "search_filter": "Highlights",
     "min_duration_minutes": 3,
