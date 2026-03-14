@@ -37,7 +37,7 @@
     "min_duration_minutes": 3
   },
   "tennis": {
-    "channel_ids": ["UCYtNSrfGdXooZYu_hkq18_w"],
+    "channel_ids": ["UCYtNSrfGdXooZYu_hkq18_w", "UCaBIVVpHjq6j3tSyxwTE-8Q"],
     "search_filter": "Tennis",
     "min_duration_minutes": 3
   },
@@ -63,7 +63,7 @@
     "default_video": "KYLiJ2NLuo8"
   },
   "tennis_tv": {
-    "channel_ids": ["UCbcxFkd6B9xUU54InHv4Tig"],
+    "channel_ids": ["UCbcxFkd6B9xUU54InHv4Tig", "UCaBIVVpHjq6j3tSyxwTE-8Q"],
     "search_filter": "Highlights",
     "min_duration_minutes": 3,
     "sns_topic_name": "arn:aws:sns:ap-southeast-1:117433956934:Tennis-Highlights"
