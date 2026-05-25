@@ -10,7 +10,8 @@
     "search_filter": "Highlights",
     "min_duration_minutes": 2,
     "default_video": "hUAd1DTj9_Y",
-    "sns_topic_name": "arn:aws:sns:ap-southeast-1:117433956934:SerieAYoutubePlaylistSubs"
+    "sns_topic_name": "arn:aws:sns:ap-southeast-1:117433956934:SerieAYoutubePlaylistSubs",
+    "ecs": "true"
   },
   "la_liga": {
     "channel_ids": ["UCTv-XvfzLX3i4IGWAm4sbmA"],
@@ -23,7 +24,8 @@
     "search_filter": "\"Champions League 25/26 Match Highlights\"",
     "min_duration_minutes": 5,
     "default_video": "Gb1iGDchKYs",
-    "sns_topic_name": "arn:aws:sns:ap-southeast-1:117433956934:champions_league_playlist_subscription"
+    "sns_topic_name": "arn:aws:sns:ap-southeast-1:117433956934:champions_league_playlist_subscription",
+    "ecs": "true"
   },
   "nba": {
     "channel_ids": ["UC0LrZO9wORIqn_aRJtKdgfA"],
@@ -39,7 +41,8 @@
   "tennis": {
     "channel_ids": ["UCYtNSrfGdXooZYu_hkq18_w", "UCaBIVVpHjq6j3tSyxwTE-8Q"],
     "search_filter": "Tennis",
-    "min_duration_minutes": 3
+    "min_duration_minutes": 3,
+    "sns_topic_name": "arn:aws:sns:ap-southeast-1:117433956934:Tennis-Highlights"
   },
   "afc": {
     "channel_ids": ["UCXTRFt1vLvZpahQtiKJjLaQ"],
@@ -63,10 +66,16 @@
     "default_video": "KYLiJ2NLuo8"
   },
   "tennis_tv": {
-    "channel_ids": ["UCbcxFkd6B9xUU54InHv4Tig", "UCaBIVVpHjq6j3tSyxwTE-8Q"],
+    "channel_ids": ["UCbcxFkd6B9xUU54InHv4Tig"],
     "search_filter": "Highlights",
     "min_duration_minutes": 3,
     "sns_topic_name": "arn:aws:sns:ap-southeast-1:117433956934:Tennis-Highlights"
+  },
+  "rolland_garros": {
+    "channel_ids": ["UCF3K1Jf8hjFW8qliei8fQ3A"],
+    "search_filter": "Highlights",
+    "min_duration_minutes": 3,
+    "sns_topic_name": "arn:aws:sns:ap-southeast-1:117433956934:rolland-garros"
   },
   "custom": {
     "channel_ids": ["UCYtNSrfGdXooZYu_hkq18_w"],
